@@ -14,6 +14,7 @@ This repository demonstrates an integration to the triPOS product.
 
 Please contact your Integration Team member for any questions about the below prerequisites.
 
+* After you clone this repository download gson-2.3.1.jar from: http://code.google.com/p/google-gson/ and place it in the libs folder within the triPOS.Java folder.  This library is used to convert JSON to/from Java objects.
 * Register and download the triPOS application: https://mft.elementps.com/backend/plugin/Registration/ (once activated, login at https://mft.elementps.com)
 * Create Express test account: http://www.elementps.com/Resources/Create-a-Test-Account
 * Install and configure triPOS
@@ -22,7 +23,7 @@ Please contact your Integration Team member for any questions about the below pr
 
 ##Documentation/Troubleshooting
 
-* triPOS provides a feature in that it embeds API documentation.  Simply point your favorite browser to:  http://localhost:8080/help/ (for a default install) and the triPOS API documentation anticipates your questions.
+* triPOS provides an embedded API documentation feature.  Simply point your favorite browser to:  http://localhost:8080/help/ (for a default install) and the triPOS API documentation anticipates your questions.
 * In addition to the help documentation above triPOS writes information to a series of log files located at:  C:\Program Files (x86)\Vantiv\triPOS Service\Logs (for a default install).
 
 ##Step 1: Generate a request package
