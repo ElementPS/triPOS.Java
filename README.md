@@ -1,5 +1,4 @@
 # triPOS.Java
-<<<<<<< HEAD
 
 * More documentation?  http://developer.mercurypay.com
 * Questions?  certification@elementps.com
