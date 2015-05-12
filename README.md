@@ -8,7 +8,7 @@
 
 This repository demonstrates an integration to the triPOS product using the Java programming language.  The project was created using Eclipse Luna Release.  The application itself is very simple and allows a user to populate a hard coded credit sale request in either XML or JSON format.  The user may then send that request to triPOS for further processing.
 
-![](https://github.com/elementps/triPOS.Java/master/screenshot.png
+![triPOS.Java](https://github.com/elementps/triPOS.Java/screenshot.png
 
 ##Prerequisites
 
