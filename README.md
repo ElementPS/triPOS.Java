@@ -1,13 +1,12 @@
 # triPOS.Java
 
-* More documentation?  http://developer.mercurypay.com
 * Questions?  certification@elementps.com
 * **Feature request?** Open an issue.
 * Feel like **contributing**?  Submit a pull request.
 
 ##Overview
 
-This repository demonstrates an integration to the triPOS product.
+This repository demonstrates an integration to the triPOS product using the Java programming language.  The project was created using Eclipse Luna Release.  The application itself is very simple and allows a user to populate a hard coded credit sale request in either XML or JSON format.  The user may then send that request to triPOS for further processing.
 
 ##Prerequisites
 
@@ -22,7 +21,7 @@ Please contact your Integration Team member for any questions about the below pr
 
 ##Documentation/Troubleshooting
 
-* triPOS provides an embedded API documentation feature.  Simply point your favorite browser to:  http://localhost:8080/help/ (for a default install) and the triPOS API documentation anticipates your questions.
+* To view the triPOS embedded API documentation point your favorite browser to:  http://localhost:8080/help/ (for a default install).
 * In addition to the help documentation above triPOS writes information to a series of log files located at:  C:\Program Files (x86)\Vantiv\triPOS Service\Logs (for a default install).
 
 ##Step 1: Generate a request package
