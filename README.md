@@ -12,7 +12,7 @@ This repository demonstrates an integration to the triPOS product using the Java
 
 ##Prerequisites
 
-Please contact your Integration Team member for any questions about the below prerequisites.
+Please contact your Integration Analyst for any questions about the below prerequisites.
 
 * After you clone this repository download gson-2.3.1.jar from: http://code.google.com/p/google-gson/ and place it in the libs folder.  This library is used to convert JSON to/from Java objects.
 * Register and download the triPOS application: https://mft.elementps.com/backend/plugin/Registration/ (once activated, login at https://mft.elementps.com)
