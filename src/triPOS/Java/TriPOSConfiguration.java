@@ -56,6 +56,11 @@ public class TriPOSConfiguration {
 	{
 		return this.developerKey;
 	}
+			
+	public String GetDeveloperSecret()
+	{
+		return this.developerSecret;
+	}
 	
 	public String GetVersion()
 	{
