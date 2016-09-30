@@ -67,13 +67,19 @@ public class TriPOSMakeRequestActionListener implements ActionListener{
 		try { 	
 			response = "";
 			this.sb = new StringBuilder();
-
-			// added for testing with a Query String
-			String queryString = "? 7 *";
+			String payload = this.txtRequest.getText();
+			
 			URL url = new URL(this.url);
 			conn = (HttpURLConnection) url.openConnection();
 			
-			conn.setRequestMethod("POST"); 
+			if (payload.length() == 0) {
+				conn.setRequestMethod("GET");
+				isJSON.data = true;
+			} 
+			else {
+				conn.setRequestMethod("POST");
+			}
+			
 			if (isJSON.data) {
 				conn.setRequestProperty("content-type", "application/json");
 				conn.setRequestProperty("accept", "application/json");
@@ -88,8 +94,7 @@ public class TriPOSMakeRequestActionListener implements ActionListener{
 			conn.setRequestProperty("tp-return-logs", "false"); 
 
 			// replace all newlines in the payload with carriage returns
-			// expected payload contains carriage returns
-			String payload = this.txtRequest.getText();
+			// expected payload contains carriage returns			
 			if (payload.contains("\n") && !(payload.contains("\r\n"))) {
 				payload = payload.replace("\n", "\r\n");
 			}
@@ -116,40 +121,52 @@ public class TriPOSMakeRequestActionListener implements ActionListener{
 			conn.setDoInput(true); 
 			conn.setDoOutput(true); 
 			
-			OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");
-			writer.write(payload); 
-			writer.close();
-			
-			
-			if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-				InputStreamReader reader = new InputStreamReader(conn.getInputStream(), "UTF-8");
-				BufferedReader rd = new BufferedReader(reader); 
-				while ((line = rd.readLine()) != null) { 
-					sb.append(line); 
-				} 
-				rd.close();	
-				
-				if (this.isJSON.data) {
-					Gson gson = new GsonBuilder().setPrettyPrinting().create();
-					JsonParser jp = new JsonParser();
-					JsonElement je = jp.parse(sb.toString());
-					response = gson.toJson(je);
-				} else {
-					sb.deleteCharAt(0);
-			        Source xmlInput = new StreamSource(new StringReader(sb.toString()));
-			        StringWriter stringWriter = new StringWriter();
-			        StreamResult xmlOutput = new StreamResult(stringWriter);
-			        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			        transformerFactory.setAttribute("indent-number", 2);
-			        Transformer transformer = transformerFactory.newTransformer(); 
-			        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			        transformer.transform(xmlInput, xmlOutput);
-			        response = xmlOutput.getWriter().toString();
+			if (payload.length() == 0) {
+				BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+				String inputLine;
+				StringBuffer responseBuf = new StringBuffer();
+
+				while ((inputLine = in.readLine()) != null) {
+					responseBuf.append(inputLine);
 				}
+				response = responseBuf.toString();
+				in.close();				
+			} else {
+				OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");
+				writer.write(payload); 
+				writer.close();
 				
-			} 
-			else {
-				response = "Error: " + conn.getResponseCode() + " " + conn.getResponseMessage(); 
+				
+				if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+					InputStreamReader reader = new InputStreamReader(conn.getInputStream(), "UTF-8");
+					BufferedReader rd = new BufferedReader(reader); 
+					while ((line = rd.readLine()) != null) { 
+						sb.append(line); 
+					} 
+					rd.close();	
+					
+					if (this.isJSON.data) {
+						Gson gson = new GsonBuilder().setPrettyPrinting().create();
+						JsonParser jp = new JsonParser();
+						JsonElement je = jp.parse(sb.toString());
+						response = gson.toJson(je);
+					} else {
+						sb.deleteCharAt(0);
+				        Source xmlInput = new StreamSource(new StringReader(sb.toString()));
+				        StringWriter stringWriter = new StringWriter();
+				        StreamResult xmlOutput = new StreamResult(stringWriter);
+				        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+				        transformerFactory.setAttribute("indent-number", 2);
+				        Transformer transformer = transformerFactory.newTransformer(); 
+				        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+				        transformer.transform(xmlInput, xmlOutput);
+				        response = xmlOutput.getWriter().toString();
+					}
+					
+				} 
+				else {
+					response = "Error: " + conn.getResponseCode() + " " + conn.getResponseMessage(); 
+				}
 			}
 		} 
 		catch (Exception ex) {
@@ -184,8 +201,10 @@ public class TriPOSMakeRequestActionListener implements ActionListener{
 		}
 		
 		// remove trailing semicolon
-		if (canonicalSignedHeaders.charAt(canonicalSignedHeaders.length() - 1) == ';') {
-			canonicalSignedHeaders.deleteCharAt(canonicalSignedHeaders.length() - 1);
+		if (canonicalSignedHeaders.length() > 0) {
+			if (canonicalSignedHeaders.charAt(canonicalSignedHeaders.length() - 1) == ';') {
+				canonicalSignedHeaders.deleteCharAt(canonicalSignedHeaders.length() - 1);
+			}
 		}
 		
 //		System.out.println("***Canonical signed headers ->\n" + canonicalSignedHeaders);	// uncomment to see canonicalSignedHeaders
@@ -208,8 +227,10 @@ public class TriPOSMakeRequestActionListener implements ActionListener{
     		}
     		
     		// remove trailing comma on header values list 
-    		if (canonicalHeaders.charAt(canonicalHeaders.length() - 1) == ',') {
-    			canonicalHeaders.deleteCharAt(canonicalHeaders.length() - 1);
+    		if (canonicalHeaders.length() > 0) {
+    			if (canonicalHeaders.charAt(canonicalHeaders.length() - 1) == ',') {
+    				canonicalHeaders.deleteCharAt(canonicalHeaders.length() - 1);
+    			}
     		}
     		
     		// newline delimit each header entry
@@ -230,7 +251,7 @@ public class TriPOSMakeRequestActionListener implements ActionListener{
     public String getCanonicalQuery (URL url) throws UnsupportedEncodingException {
     	String query = null;
     	if (url.getQuery() != null) {
-    		query = Base64.encode(url.getQuery().getBytes("UTF-8"));
+    		query = url.getQuery();
     	}
     	
 //    	System.out.println("***Canonical query ->\n" + query);	// uncomment to print the canonical query
@@ -402,7 +423,10 @@ public class TriPOSMakeRequestActionListener implements ActionListener{
     }
 
     public String makeAuthorizationHeader (URL url, String payload, Map<String, List<String>> headers, String method, String requestDate, String nonce, String algorithm, String developerKey, String developerSecret) throws DigestException, UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException{
-		String payloadHash = hexEncodeHash(payload, algorithm);
+		String payloadHash = "";
+		if (payload.length() > 0) {
+			payloadHash = hexEncodeHash(payload, algorithm);
+		}
 
 		// Get canonical signed headers from the request
 		String canonicalSignedHeaders = getCanonicalSignedHeaders(headers);
