@@ -10,6 +10,8 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.DigestException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -18,6 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -38,6 +42,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
+
 
 public class TriPOSMakeRequestActionListener implements ActionListener{
 
@@ -250,13 +255,46 @@ public class TriPOSMakeRequestActionListener implements ActionListener{
     
     public String getCanonicalQuery (URL url) throws UnsupportedEncodingException {
     	String query = null;
+    	StringBuilder canonicalQuery = new StringBuilder();
     	if (url.getQuery() != null) {
-    		query = url.getQuery();
+    		Map<String, List<String>> queryData = splitQuery(url);
+    		List<String> sortedKeys=new ArrayList<String>(queryData.keySet());
+    		Collections.sort(sortedKeys);
+    	
+    		for (String temp : sortedKeys) {
+        		for (String queryValue : queryData.get(temp)) {
+        			if (queryValue != null) {
+        				canonicalQuery.append(URLEncoder.encode(temp, "UTF-8") + "=" + URLEncoder.encode(queryValue, "UTF-8") + "&");
+        			}
+        		}
+    		}
     	}
     	
+    	if (canonicalQuery.length() > 0) {
+    		canonicalQuery.setLength(canonicalQuery.length() - 1);
+    		query = canonicalQuery.toString();
+    	}
 //    	System.out.println("***Canonical query ->\n" + query);	// uncomment to print the canonical query
     	return query;
+    	
+
     }
+    
+    public static Map<String, List<String>> splitQuery(URL url) throws UnsupportedEncodingException {
+    	  final Map<String, List<String>> query_pairs = new LinkedHashMap<String, List<String>>();
+    	  final String[] pairs = url.getQuery().split("&");
+    	  for (String pair : pairs) {
+    	    final int idx = pair.indexOf("=");
+    	    final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), "UTF-8") : pair;
+    	    if (!query_pairs.containsKey(key)) {
+    	      query_pairs.put(key, new LinkedList<String>());
+    	    }
+    	    final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), "UTF-8") : null;
+    	    query_pairs.get(key).add(value);
+    	  }
+    	  return query_pairs;
+    	}
+    
     
     public String createUTF8 (String s) throws UnsupportedEncodingException {
     	byte [] utf8Bytes = s.getBytes("UTF-8");
@@ -429,10 +467,16 @@ public class TriPOSMakeRequestActionListener implements ActionListener{
 		}
 
 		// Get canonical signed headers from the request
-		String canonicalSignedHeaders = getCanonicalSignedHeaders(headers);
+		String canonicalSignedHeaders = "";
+		if (headers != null && !headers.isEmpty()) {
+			canonicalSignedHeaders = getCanonicalSignedHeaders(headers);
+		}
 		
 		// Get canonical headers from the request 
-		String canonicalHeaders = getCanonicalHeaders(headers, canonicalSignedHeaders);
+		String canonicalHeaders = "";
+		if (headers != null && !headers.isEmpty() && canonicalSignedHeaders.length() > 0) {
+			canonicalHeaders = getCanonicalHeaders(headers, canonicalSignedHeaders);
+		}
 		
 		// Get canonical uri from the request
 		String canonicalUri = getCanonicalUri(url);
