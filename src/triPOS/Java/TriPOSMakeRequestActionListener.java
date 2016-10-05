@@ -264,7 +264,9 @@ public class TriPOSMakeRequestActionListener implements ActionListener{
     		for (String temp : sortedKeys) {
         		for (String queryValue : queryData.get(temp)) {
         			if (queryValue != null) {
-        				canonicalQuery.append(URLEncoder.encode(temp, "UTF-8") + "=" + URLEncoder.encode(queryValue, "UTF-8") + "&");
+        				//URLEncoder uses forms encoding so will encode a space to + but we want URL encoding so replace + with %20
+        				//investigate org.apache.commons.httpclient.util.URIUtil
+        				canonicalQuery.append(URLEncoder.encode(temp, "UTF-8").replace("+", "%20") + "=" + URLEncoder.encode(queryValue, "UTF-8").replace("+", "%20") + "&");
         			}
         		}
     		}
